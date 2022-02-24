@@ -1,0 +1,96 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+
+namespace _1
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            // only checking the values for water, since if x is water, then flour = 100 - x
+            var itemsToCheck = new Dictionary<string, double>()
+            { {"Croissant", 50}, {"Muffin", 40 }, {"Baguette", 30}, {"Bagel", 20} };
+            var dishesCooked = new Dictionary<string, int>()
+            { {"Croissant", 0}, {"Muffin", 0 }, {"Baguette", 0}, {"Bagel", 0} };
+
+            double[] water_arr = Console.ReadLine()
+                              .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                              .Select(double.Parse)
+                              .ToArray();
+            double[] flour_arr = Console.ReadLine()
+                              .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                              .Select(double.Parse)
+                              .ToArray();
+
+            Queue<double> water = new Queue<double>(water_arr);
+            Stack<double> flour = new Stack<double>(flour_arr);
+
+            while (water.Count > 0 && flour.Count > 0)
+            {
+                double water_value = water.Peek();
+                double flour_value = flour.Peek();
+                double total = water_value + flour_value;
+                double waterPercent = (water_value * 100) / total; 
+                if (itemsToCheck.ContainsValue(waterPercent))
+                {
+                    water.Dequeue();
+                    flour.Pop();
+                    switch (waterPercent)
+                    {
+                        case 50:
+                            dishesCooked["Croissant"]++;
+                            break;
+                        case 40:
+                            dishesCooked["Muffin"]++;
+                            break;
+                        case 30:
+                            dishesCooked["Baguette"]++;
+                            break;
+                        case 20:
+                            dishesCooked["Bagel"]++;
+                            break;
+                    }
+                }
+                else
+                {
+                    water.Dequeue();
+                    if (flour_value > water_value)
+                    {
+                        double subtractTo = flour_value - water_value;
+                        flour_value -= subtractTo;
+                        flour.Pop();
+                        flour.Push(subtractTo);
+                    }
+                    else
+                    {
+                        double subtractTo = water_value - flour_value;
+                        flour_value -= subtractTo;
+                        flour.Pop();
+                        flour.Push(subtractTo);
+                    }
+                    dishesCooked["Croissant"]++;
+                }
+            }
+
+            foreach (var dish in dishesCooked
+                                 .Where(x => x.Value > 0)
+                                 .OrderByDescending(x => x.Value)
+                                 .ThenBy(x => x.Key))
+            {
+                Console.WriteLine($"{dish.Key}: {dish.Value}");
+            }
+
+            if (water.Count > 0)
+                Console.WriteLine($"Water left: {string.Join(", ", water)}");
+            else
+                Console.WriteLine("Water left: None");
+
+            if (flour.Count > 0)
+                Console.WriteLine($"Flour left: {string.Join(", ", flour)}");
+            else
+                Console.WriteLine("Flour left: None");
+        }
+    }
+}
