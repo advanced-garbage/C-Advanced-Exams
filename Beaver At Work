@@ -1,0 +1,237 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace _2
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Regex lowercaseCheck = new Regex(@"[a-z]+");
+            int totalBranches = 0;
+            List<char> branches = new List<char>();
+            int[] beaverPos = new int[2];
+            int n = int.Parse(Console.ReadLine());
+            char[,] pond = new char[n, n];
+
+            for (int i = 0; i < pond.GetLength(0); i++)
+            {
+                char[] getChars = Console.ReadLine()
+                                  .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                  .Select(char.Parse)
+                                  .ToArray();
+                for (int j = 0; j < getChars.Length; j++)
+                {
+                    pond[i, j] = getChars[j];
+                    if (pond[i, j] == 'B')
+                    {
+                        beaverPos[0] = i;
+                        beaverPos[1] = j;
+                    }
+                    else if (lowercaseCheck.IsMatch(pond[i, j].ToString()))
+                        totalBranches++;
+                }
+            }
+
+            string input;
+            while ((input = Console.ReadLine().ToLower()) != "end")
+            {
+                bool itGotOut = false;
+                pond[beaverPos[0], beaverPos[1]] = '-';
+                switch (input)
+                {
+                    case "up":
+                        if (IsInRange(pond, beaverPos[0] - 1, beaverPos[1]))
+                        {
+                            beaverPos[0]--;
+                        }
+                        else itGotOut = true;
+                        break;
+                    case "down":
+                        if (IsInRange(pond, beaverPos[0] + 1, beaverPos[1]))
+                        {
+                            beaverPos[0]++;
+                        }
+                        else itGotOut = true;
+                        break;
+                    case "right":
+                        if (IsInRange(pond, beaverPos[0], beaverPos[1] + 1))
+                        {
+                            beaverPos[1]++;
+                        }
+                        else itGotOut = true;
+                        break;
+                    case "left":
+                        if (IsInRange(pond, beaverPos[0], beaverPos[1] - 1))
+                        {
+                            beaverPos[1]--;
+                        }
+                        else itGotOut = true;
+                        break;
+                }
+
+                if (itGotOut && branches.Count > 0)
+                {
+                    branches.RemoveAt(branches.Count - 1);
+                    totalBranches--;
+                }
+
+                if (pond[beaverPos[0], beaverPos[1]].Equals('F'))
+                {
+                    pond[beaverPos[0], beaverPos[1]] = '-';
+                    int[] loopPos = new int[2] { beaverPos[0], beaverPos[1] };
+                    bool isBeaverAtLastIndex = beaverPos[0].Equals(0) ||
+                                               beaverPos[0].Equals(pond.GetLength(0) - 1) ||
+                                               beaverPos[1].Equals(0) ||
+                                               beaverPos[1].Equals(pond.GetLength(1) - 1);
+
+                    if (isBeaverAtLastIndex)
+                    {
+                        switch (input)
+                        {
+                            case "right":
+                                for (int i = loopPos[1]; i >= 0; i--)
+                                {
+                                    beaverPos[1]--;
+                                    if (beaverPos[1].Equals(0)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "left":
+                                for (int i = loopPos[1]; i < pond.GetLength(1) - 1; i++)
+                                {
+                                    beaverPos[1]++;
+                                    if (beaverPos[1].Equals(pond.GetLength(1) - 1)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "up":
+                                for (int i = loopPos[0]; i < pond.GetLength(0) - 1; i++)
+                                {
+                                    beaverPos[0]++;
+                                    if (beaverPos[0].Equals(pond.GetLength(0) - 1)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "down":
+                                for (int i = loopPos[0]; i >= 0; i--)
+                                {
+                                    beaverPos[0]--;
+                                    if (beaverPos[0].Equals(0)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (input)
+                        {
+                            case "right":
+                                for (int i = loopPos[1]; i < pond.GetLength(1) - 1; i++)
+                                {
+                                    beaverPos[1]++;
+                                    if (beaverPos[1].Equals(pond.GetLength(1) - 1)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "left":
+                                for (int i = loopPos[1]; i >= 0; i--)
+                                {
+                                    beaverPos[1]--;
+                                    if (beaverPos[1].Equals(0)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "up":
+                                for (int i = loopPos[0]; i >= 0; i--)
+                                {
+                                    beaverPos[0]--;
+                                    if (beaverPos[0].Equals(0)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                            case "down":
+                                for (int i = loopPos[0]; i < pond.GetLength(0) - 1; i++)
+                                {
+                                    beaverPos[0]++;
+                                    if (beaverPos[0].Equals(pond.GetLength(0) - 1)
+                                        && lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                                    {
+                                        branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                                    }
+                                }
+                                break;
+                        }
+
+                    }
+                    pond[beaverPos[0], beaverPos[1]] = 'B';
+                }
+                else if (lowercaseCheck.IsMatch(pond[beaverPos[0], beaverPos[1]].ToString()))
+                {
+                    branches.Add(pond[beaverPos[0], beaverPos[1]]);
+                    pond[beaverPos[0], beaverPos[1]] = 'B';
+                }
+                else
+                    pond[beaverPos[0], beaverPos[1]] = 'B';
+
+                if (totalBranches == branches.Count)
+                {
+                    Output(pond, totalBranches, branches);
+                }
+
+            }
+
+            Output(pond, totalBranches, branches);
+        }
+
+        public static bool IsInRange(char[,] arr, int y, int x)
+        {
+            return ((y >= 0 && y < arr.GetLength(0)) &&
+                    (x >= 0 && x < arr.GetLength(1)));
+        }
+
+        public static void Output(char[,] arr, int total, List<char> branches)
+        {
+            if (total == branches.Count)
+                Console.WriteLine($"The Beaver successfully collect {branches.Count} wood branches: {string.Join(", ", branches)}.");
+            else
+                Console.WriteLine($"The Beaver failed to collect every wood branch. There are {total - branches.Count} branches left.");
+
+            for (int r = 0; r < arr.GetLength(0); r++)
+            {
+                for (int c = 0; c < arr.GetLength(1); c++)
+                {
+                    Console.Write($"{arr[r, c]} ");
+                }
+                Console.WriteLine();
+            }
+
+            Environment.Exit(0);
+        }
+    }
+}
